@@ -10,7 +10,9 @@ export class AppComponent {
   title = 'upload-files';
   body: string = '';
   physicalFiles: any[] = [];
+  allPhysicalFiles: any[] = [];
   message: string = '';
+  filesExtended: any[] = [];
   files: any[] = [];
 
   @ViewChild('fileInput')
@@ -22,27 +24,43 @@ export class AppComponent {
   onFileSelected(event: any) {
     if (event.target.files.length > 0) {
       this.physicalFiles.push(event.target.files[0]);
+      this.allPhysicalFiles.push(event.target.files[0]);
     }
   }
 
   onAdd(): void {
-    this.files.push({ body: this.body, files: this.physicalFiles, message: this.message });
+    this.filesExtended.push({ body: this.body, files: this.physicalFiles, message: this.message });
+    this.files.push({ body: this.body, message: this.message });
     this.body = '';
-    this.physicalFiles = [];
     this.message = '';
     this.fileInput.nativeElement.value = "";
     this.fileInput2.nativeElement.value = "";
+    this.physicalFiles = [];
   }
 
   onPost(): void {
     let formData = new FormData();
-    for (var index = 0; index < this.files.length; index++) {
-      this.createsFormData(index, formData, this.files[index]);
+    for (var index = 0; index < this.filesExtended.length; index++) {
+      this.createsFormData(index, formData, this.filesExtended[index]);
     }
-    this.files = [];
 
     this.http.post<any>('http://localhost:62966/File', formData).subscribe(data => {
     });
+
+    const serializedFiles = JSON.stringify(this.files);
+    let formData2 = new FormData();
+    const allPhysicalFiles: any = this.allPhysicalFiles;
+    for (let i = 0; i < allPhysicalFiles.length; i++) {
+      formData2.append('physicalFiles', allPhysicalFiles[i]);
+    }
+    formData2.append('filesJson', serializedFiles);
+    this.http.post<any>('http://localhost:62966/File/SendFilesSeparately', formData2).subscribe(data => {
+    });
+
+    this.filesExtended = [];
+    this.files = [];
+    this.physicalFiles = [];
+    this.allPhysicalFiles = [];
   }
 
   createsFormData(index: number, formData: FormData, object: any, arrayName: string = ''): FormData {
