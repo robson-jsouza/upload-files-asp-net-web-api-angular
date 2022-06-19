@@ -3,14 +3,14 @@
 ## In order to test this HttpPost method from Postman, it is necessary to call this URL (after running the backend project): http://localhost:62966/file
 
 ## On Postman, this request example may be followed, considering the DTO below and that 2 files are sent by each DTO:
-
+```
 public class FileDto
 {
 	public string Body { get; set; }
 	public IEnumerable<IFormFile> Files { get; set; }
 	public string Message { get; set; }
 } 
-
+```
 On Postman, it is necessary to select Post for the request, put this URL http://localhost:62966/file, click on Body, select form-data and add the parameters.
 This is an example:
 
