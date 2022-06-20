@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace WebApplication1.Controllers
 {
@@ -9,14 +13,29 @@ namespace WebApplication1.Controllers
     [Route("[controller]")]
     public class FileController : ControllerBase
     {
-        public FileController()
+        private readonly IWebHostEnvironment _hostingEnvironment;
+
+        public FileController(IWebHostEnvironment environment)
         {
+            _hostingEnvironment = environment;
         }
 
         [HttpPost]
-        public void Send([FromForm] IEnumerable<FileExtendedDto> files)
+        public async Task Send([FromForm] IEnumerable<FileExtendedDto> files)
         {
-            var emailFromParam = files;
+            string uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "uploads");
+            Directory.CreateDirectory(uploads);
+            foreach (IFormFile file in files.SelectMany(f => f.Files))
+            {
+                if (file.Length > 0)
+                {
+                    string filePath = Path.Combine(uploads, file.FileName);
+                    using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fileStream);
+                    }
+                }
+            }
         }
 
         [HttpPost]
