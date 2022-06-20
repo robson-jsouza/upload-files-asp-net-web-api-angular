@@ -55,7 +55,8 @@ namespace WebApplication1
 
             app.UseRouting();
 
-            app.UseCors(_policyName);
+            app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()
+            .WithExposedHeaders("content-disposition"));
 
             app.UseAuthorization();
 

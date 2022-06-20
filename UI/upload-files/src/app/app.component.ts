@@ -14,6 +14,7 @@ export class AppComponent {
   message: string = '';
   filesExtended: any[] = [];
   files: any[] = [];
+  fileName: string = '';
 
   @ViewChild('fileInput')
   fileInput!: ElementRef;
@@ -61,6 +62,19 @@ export class AppComponent {
     this.files = [];
     this.physicalFiles = [];
     this.allPhysicalFiles = [];
+  }
+
+  downloadFile(): void {
+    this.http.get(`http://localhost:62966/File/files/${this.fileName}`, { observe: 'response', responseType: 'blob' })
+      .subscribe(response => {
+        let fileName = response.headers.get('content-disposition')
+          ?.split(';')[1].split('=')[1] ?? '';
+        let blob: Blob = response.body as Blob;
+        let a = document.createElement('a');
+        a.download = fileName;
+        a.href = window.URL.createObjectURL(blob);
+        a.click();
+      });
   }
 
   createsFormData(index: number, formData: FormData, object: any, arrayName: string = ''): FormData {
